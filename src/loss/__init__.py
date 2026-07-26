@@ -1,1 +1,1 @@
-from src.loss.example import ExampleLoss
+from src.loss.bce_with_logits_loss import BCEWithLogitsLossWrapper
