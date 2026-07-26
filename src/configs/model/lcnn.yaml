@@ -1,0 +1,3 @@
+_target_: src.model.lcnn.LCNN
+in_channels: 1
+dropout_rate: 0.7
