@@ -263,6 +263,12 @@ class BaseTrainer:
         self.is_train = False
         self.model.eval()
         self.evaluation_metrics.reset()
+
+        # reset before compute metrics
+        for metric in self.metrics["inference"]:
+            if hasattr(metric, "reset"):
+                metric.reset()
+                
         with torch.no_grad():
             for batch_idx, batch in tqdm(
                 enumerate(dataloader),
@@ -274,6 +280,14 @@ class BaseTrainer:
                     metrics=self.evaluation_metrics,
                 )
             self.writer.set_step(epoch * self.epoch_len, part)
+
+            # compute global metrics like EER before logging
+            for metric in self.metrics["inference"]:
+                if hasattr(metric, "compute"):
+                    computed_value = metric.compute()
+                    # put computed_value in MetricTracker instead of 0.0
+                    self.evaluation_metrics._data.loc[metric.name, "average"] = computed_value
+            
             self._log_scalars(self.evaluation_metrics)
             self._log_batch(
                 batch_idx, batch, part
