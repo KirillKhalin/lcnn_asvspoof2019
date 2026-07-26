@@ -52,6 +52,8 @@ class Trainer(BaseTrainer):
             metrics.update(loss_name, batch[loss_name].item())
 
         for met in metric_funcs:
+            # for EERMetric this mehtod will return 0.0
+            # scores will compute inside the instance of metric object.
             metrics.update(met.name, met(**batch))
         return batch
 
