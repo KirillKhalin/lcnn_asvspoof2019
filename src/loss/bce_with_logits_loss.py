@@ -13,18 +13,18 @@ class BCEWithLogitsLossWrapper(nn.Module):
             pos_weight = torch.tensor(pos_weight)
         self.loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
-    def forward(self, logits: torch.Tensor, target: torch.Tensor, **kwargs):
+    def forward(self, logits: torch.Tensor, label: torch.Tensor, **kwargs):
         """
         Args:
             logits (torch.Tensor): Output logits from LCNN, shape (B, 1) or (B,).
-            target (torch.Tensor): Ground truth labels, shape (B, 1) or (B,).
+            label (torch.Tensor): Truth labels, shape (B, 1) or (B,).
         
         Returns:
             dict: Dictionary with key 'loss'.
         """
         logits = logits.squeeze(-1)
-        target = target.squeeze(-1).float()
+        label = label.squeeze(-1).float()
 
-        loss = self.loss(logits, target)
+        loss = self.loss(logits, label)
         
         return {"loss": loss}
