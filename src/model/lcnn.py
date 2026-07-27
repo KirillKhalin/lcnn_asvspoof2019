@@ -100,7 +100,7 @@ class LCNN(nn.Module):
             nn.Linear(80, 1)
         )
     
-    def forward(self, audio):
+    def forward(self, audio, **kwargs):
         """Forward pass.
 
         Args:
