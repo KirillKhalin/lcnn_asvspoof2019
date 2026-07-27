@@ -126,6 +126,7 @@ class Inferencer(BaseTrainer):
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
+        '''
         # Some saving logic. This is an example
         # Use if you need to save predictions on disk
 
@@ -149,6 +150,10 @@ class Inferencer(BaseTrainer):
             if self.save_path is not None:
                 # you can use safetensors or other lib here
                 torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+        
+        return batch
+        '''
+        batch["probs"] = torch.sigmoid(batch["logits"]).squeeze(-1).detach().cpu().numpy()
 
         return batch
 
@@ -172,6 +177,8 @@ class Inferencer(BaseTrainer):
         if self.save_path is not None:
             (self.save_path / part).mkdir(exist_ok=True, parents=True)
 
+        '''
+        # example
         with torch.no_grad():
             for batch_idx, batch in tqdm(
                 enumerate(dataloader),
@@ -186,3 +193,29 @@ class Inferencer(BaseTrainer):
                 )
 
         return self.evaluation_metrics.result()
+        '''
+        
+        with torch.no_grad():
+            for batch_idx, batch in enumerate(dataloader):
+                batch = self.process_batch(
+                    batch_idx=batch_idx,
+                    batch=batch,
+                    part=part,
+                    metrics=self.evaluation_metrics,
+                )
+                
+                # compute data for .csv file
+                if "utt_id" in batch and "probs" in batch:
+                    all_utt_ids.extend(batch["utt_id"])
+                    all_probs.extend(batch["probs"])
+
+        if self.save_path is not None and len(all_utt_ids) > 0:
+            csv_path = self.save_path / "submission.csv"
+            with open(csv_path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                for uid, score in zip(all_utt_ids, all_probs):
+                    writer.writerow([uid, float(score)])
+                    
+        if self.evaluation_metrics is not None:
+            return self.evaluation_metrics.result()
+        return {}
