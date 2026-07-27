@@ -4,7 +4,7 @@ defaults:
   - metrics: eer
   - datasets: asvspoof
   - dataloader: asvspoof
-  - transforms: null
+  - transforms: none
   - _self_
 optimizer:
   _target_: torch.optim.Adam
