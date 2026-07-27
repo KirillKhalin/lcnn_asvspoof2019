@@ -1,13 +1,13 @@
 defaults:
-  - model: baseline
-  - metrics: example
-  - datasets: example_eval # we do not want to run inference on training data
-  - dataloader: example
-  - transforms: example
+  - model: lcnn
+  - metrics: eer
+  - datasets: asvspoof_eval # we do not want to run inference on training data
+  - dataloader: asvspoof
+  - transforms: none
   - _self_
 inferencer:
-  device_tensors: ["data_object", "labels"] # which tensors should be on device (ex. GPU)
+  device_tensors: ["autdio", "label"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
-  save_path: "example" # any name here, can be a dataset name
-  seed: 1
+  save_path: "inference" # any name here, can be a dataset name
+  seed: 10
   from_pretrained: "saved/model_best.pth" # path to the pretrained model
