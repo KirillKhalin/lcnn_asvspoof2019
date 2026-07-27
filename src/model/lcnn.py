@@ -100,7 +100,7 @@ class LCNN(nn.Module):
             nn.Linear(80, 1)
         )
     
-    def forward(self, x):
+    def forward(self, audio):
         """Forward pass.
 
         Args:
@@ -109,7 +109,7 @@ class LCNN(nn.Module):
         Returns:
             dict: Dictionary containing 'logits' tensor of shape [B].
         """
-        x = self.stft(x) # x.shape = [B, n_fft//2+1, Time]
+        x = self.stft(audio) # x.shape = [B, n_fft//2+1, Time]
         
         x = x.transpose(1, 2) # [B, Time, n_fft//2+1]
         x = self.compress(x)  # [B, Time, 60]
