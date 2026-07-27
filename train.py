@@ -2,6 +2,7 @@ import warnings
 
 import hydra
 import torch
+import torch.nn as nn
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 
