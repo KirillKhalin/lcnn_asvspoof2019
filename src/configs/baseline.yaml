@@ -29,3 +29,6 @@ trainer:
   override: False # if True, will override the previous run with the same name
   seed: 10
   train_one_batch: False
+transforms:
+  batch_transforms: null
+  instance_transforms: null
