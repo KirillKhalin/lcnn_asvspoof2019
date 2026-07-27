@@ -43,7 +43,7 @@ def createLFB(n_fft, sr, n_filters):
 
 class LCNN(nn.Module):
     """LCNN for anti-spoofing task."""
-    def __init__(self, n_fft=512, win_length=320, hop_length=160, sr=16000):
+    def __init__(self, n_fft=512, win_length=320, hop_length=160, sr=16000, dropout_rate=0.7):
         super(LCNN, self).__init__()
         
         self.stft = torchaudio.transforms.Spectrogram(
@@ -94,7 +94,7 @@ class LCNN(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Flatten(1),
-            nn.Dropout(p=0.7),
+            nn.Dropout(p=dropout_rate),
             nn.LazyLinear(out_features=160),
             MFM(),
             nn.Linear(80, 1)
