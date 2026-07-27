@@ -45,7 +45,7 @@ class ASVspoof2019Dataset(Dataset):
 
         return {
             "audio": wav,
-            "target": torch.tensor(label, dtype=torch.float32),
+            "label": torch.tensor(label, dtype=torch.float32),
             "utt_id": utt_id,
         }
 
