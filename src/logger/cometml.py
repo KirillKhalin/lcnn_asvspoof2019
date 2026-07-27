@@ -79,6 +79,7 @@ class CometMLWriter:
             logger.warning("For use comet_ml install it via \n\t pip install comet_ml")
 
         self.step = 0
+        self.epoch = None
         # the mode is usually equal to the current partition name
         # used to separate Partition1 and Partition2 metrics
         self.mode = ""
@@ -106,6 +107,18 @@ class CometMLWriter:
                 "steps_per_sec", (self.step - previous_step) / duration.total_seconds()
             )
             self.timer = datetime.now()
+
+    def set_epoch(self, epoch):
+        """
+        Define current epoch for the tracker.
+
+        Calculates the difference between method calls to monitor
+        training/evaluation speed.
+
+        Args:
+            epoch (int): current epoch.
+        """
+        self.epoch = epoch
 
     def _object_name(self, object_name):
         """
@@ -145,11 +158,15 @@ class CometMLWriter:
             scalar_name (str): name of the scalar to use in the tracker.
             scalar (float): value of the scalar.
         """
+        kwargs = {"step": self.step}
+        if self.epoch is not None:
+            kwargs["epoch"] = self.epoch
+        
         self.exp.log_metrics(
             {
                 self._object_name(scalar_name): scalar,
             },
-            step=self.step,
+            **kwargs
         )
 
     def add_scalars(self, scalars):
@@ -159,12 +176,16 @@ class CometMLWriter:
         Args:
             scalars (dict): dict, containing scalar name and value.
         """
+        kwargs = {"step": self.step}
+        if self.epoch is not None:
+            kwargs["epoch"] = self.epoch
+            
         self.exp.log_metrics(
             {
                 self._object_name(scalar_name): scalar
                 for scalar_name, scalar in scalars.items()
             },
-            step=self.step,
+            **kwargs
         )
 
     def add_image(self, image_name, image):
