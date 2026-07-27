@@ -11,6 +11,38 @@ from src.utils.init_utils import set_random_seed, setup_saving_and_logging
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
+def train_one_batch(model, dataloader, device):
+    """
+    Check if model can teach.
+    """
+    print("Train one batch started")
+    test_optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+    pos_weight = torch.tensor([8.837], device=device)
+    test_criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    
+    model.train()
+    
+    batch = next(iter(dataloader))
+    
+    for k, v in batch.items():
+        if torch.is_tensor(v):
+            batch[k] = v.to(device)
+            
+    for i in range(60):
+        test_optimizer.zero_grad()
+
+        outputs = model(**batch)
+        
+        loss = test_criterion(outputs["logits"], batch["label"])
+
+        if i % 5 == 0:
+            print("iteration ", i, "; loss: ", loss.item())
+
+        loss.backward()
+        test_optimizer.step()
+        
+    print('Train one batch finished')
+
 
 @hydra.main(version_base=None, config_path="src/configs", config_name="baseline")
 def main(config):
@@ -40,6 +72,12 @@ def main(config):
     # build model architecture, then print to console
     model = instantiate(config.model).to(device)
     logger.info(model)
+
+    # sanity check: training of one batch
+    if config.trainer.get("train_one_batch", False):
+        train_one_batch(model, dataloader=dataloaders["train"], device=device)
+        logger.info(".")
+        sys.exit(0)
 
     # get function handles of loss and metrics
     loss_function = instantiate(config.loss_function).to(device)
