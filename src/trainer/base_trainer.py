@@ -201,6 +201,9 @@ class BaseTrainer:
         self.model.train()
         self.train_metrics.reset()
         self.writer.set_step((epoch - 1) * self.epoch_len)
+        if hasattr(self.writer, "set_epoch"):
+            self.writer.set_epoch(epoch)
+            
         self.writer.add_scalar("epoch", epoch)
         for batch_idx, batch in enumerate(
             tqdm(self.train_dataloader, desc="train", total=self.epoch_len)
