@@ -62,10 +62,10 @@ class EERMetric(BaseMetric):
         self.bonafide_scores = []
         self.other_scores = []
 
-    def __call__(self, logits: torch.Tensor, target: torch.Tensor, **kwargs):
+    def __call__(self, logits: torch.Tensor, label: torch.Tensor, **kwargs):
         """Compute scores from all batches."""
         probs = torch.sigmoid(logits).detach().cpu().numpy().reshape(-1)
-        labels = target.detach().cpu().numpy().reshape(-1)
+        labels = label.detach().cpu().numpy().reshape(-1)
 
         self.bonafide_scores.extend(probs[labels == 1.0])
         self.other_scores.extend(probs[labels == 0.0])
