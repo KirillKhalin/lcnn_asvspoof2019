@@ -8,7 +8,7 @@ from tqdm.auto import tqdm
 from src.datasets.data_utils import inf_loop
 from src.metrics.tracker import MetricTracker
 from src.utils.io_utils import ROOT_PATH
-
+from src.utils.grade import compute_grade
 
 class BaseTrainer:
     """
@@ -290,6 +290,14 @@ class BaseTrainer:
                     computed_value = metric.compute()
                     # put computed_value in MetricTracker instead of 0.0
                     self.evaluation_metrics._data.loc[metric.name, "average"] = computed_value
+
+            # grade logging
+            if "EER" in self.evaluation_metrics.keys():
+                val_eer = self.evaluation_metrics.avg("EER")
+                grade = compute_grade(val_eer)
+                
+                if self.writer is not None:
+                    self.writer.add_scalar("Grade", grade)
             
             self._log_scalars(self.evaluation_metrics)
             self._log_batch(
