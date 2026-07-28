@@ -1,9 +1,10 @@
 import torch
+import csv
 from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
-
+from src.utils.grade import compute_grade
 
 class Inferencer(BaseTrainer):
     """
@@ -194,6 +195,9 @@ class Inferencer(BaseTrainer):
 
         return self.evaluation_metrics.result()
         '''
+
+        all_utt_ids = []
+        all_probs = []
         
         with torch.no_grad():
             for batch_idx, batch in enumerate(dataloader):
@@ -209,6 +213,7 @@ class Inferencer(BaseTrainer):
                     all_utt_ids.extend(batch["utt_id"])
                     all_probs.extend(batch["probs"])
 
+        # save .csv file
         if self.save_path is not None and len(all_utt_ids) > 0:
             csv_path = self.save_path / "submission.csv"
             with open(csv_path, 'w', newline='') as file:
@@ -217,5 +222,17 @@ class Inferencer(BaseTrainer):
                     writer.writerow([uid, float(score)])
                     
         if self.evaluation_metrics is not None:
+            for metric in self.metrics["inference"]:
+                if hasattr(metric, "compute"):
+                    computed_value = metric.compute()
+                    self.evaluation_metrics._data.loc[metric.name, "average"] = computed_value
+
+            # compute grade
+            if "EER" in self.evaluation_metrics.keys():
+                eval_eer = self.evaluation_metrics.avg("EER")
+                grade = compute_grade(eval_eer)
+                
+                self.evaluation_metrics._data.loc["Grade", "average"] = grade
+
             return self.evaluation_metrics.result()
         return {}
