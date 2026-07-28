@@ -6,7 +6,7 @@ defaults:
   - transforms: none
   - _self_
 inferencer:
-  device_tensors: ["autdio", "label"] # which tensors should be on device (ex. GPU)
+  device_tensors: ["audio", "label"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
   save_path: "inference" # any name here, can be a dataset name
   seed: 10
