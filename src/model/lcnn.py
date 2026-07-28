@@ -18,27 +18,17 @@ class MFM(nn.Module):
 def createLFB(n_fft, sr, n_filters):
     """Linear Filter Bank (LFB) initialization tensor."""
     # return Tensor: [n_fft//2+1, n_filters]
-    f = (sr / 2) * torch.linspace(0, 1, n_fft // 2 + 1)
-    arr = torch.linspace(min(f), max(f), n_filters + 2)
-    answer = torch.zeros([n_fft //2 + 1, n_filters])
+    n_bins = n_fft // 2 + 1
+    f = torch.linspace(0, sr / 2, n_bins).unsqueeze(1) # [n_bins, 1]
+    arr = torch.linspace(0, sr / 2, n_filters + 2)     # [n_filters + 2]
     
-    for i in range(n_filters):
-        a = arr[i]
-        b = arr[i + 1]
-        c = arr[i + 2]
-        y = torch.zeros_like(f)
-        
-        frst = (a <= f) & (f <= b)
-        if b != a:
-            y[frst] = (f[frst] - a) / (b - a)
-        else:
-            y[frst] = 1.0
-            
-        scnd = (b < f) & (f <= c)
-        if c != b:
-            y[scnd] = (c - f[scnd]) / (c - b)
-            
-        answer[:, i] = y
+    a = arr[:-2]
+    b = arr[1:-1]
+    c = arr[2:]
+    up = (f - a) / (b - a)
+    down = (c - f) / (c - b)
+    
+    answer = torch.clamp(torch.min(up, down), min=0.0)
     return answer
 
 class LCNN(nn.Module):
@@ -50,7 +40,7 @@ class LCNN(nn.Module):
             n_fft=n_fft,
             win_length=win_length,
             hop_length=hop_length,
-            window_fn=torch.hann_window,
+            window_fn=torch.blackman_window,
             power=1.0
         )
 
@@ -114,8 +104,7 @@ class LCNN(nn.Module):
         x = x.transpose(1, 2) # [B, Time, n_fft//2+1]
         x = self.compress(x)  # [B, Time, 60]
         x = torch.pow(x, 2)
-        x = x + torch.finfo(torch.float32).eps
-        x = torch.log10(x) # [B, Time, 60]
+        x = torch.log10(torch.clamp(x, min=1.2e-7)) # [B, Time, 60]
         
         x = x.transpose(1, 2) # [B, 60, Time]
         x = x.unsqueeze(dim=1) # [B, 1, 60, Time]
