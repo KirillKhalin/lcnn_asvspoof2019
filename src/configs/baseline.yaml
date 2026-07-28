@@ -23,7 +23,7 @@ trainer:
   save_dir: "saved/"
   save_period: 100 # checkpoint each save_period epochs in addition to the best epoch
   monitor: "min eval_EER" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
-  early_stop: 10 # epochs for early stopping
+  early_stop: 20 # epochs for early stopping
   device_tensors: ["audio", "label"] # which tensors should be on device (ex. GPU), keys from Dataset
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
