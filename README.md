@@ -21,6 +21,12 @@
 </a>
 </p>
 
+## About
+
+This repository contains an implementation of Light CNN (LCNN) for voice anti-spoofing based on the **ASVspoof 2019 Logical Access (LA)** evaluation setup.
+
+The codebase is built using the PyTorch project template, providing configuration management via [Hydra](https://hydra.cc/).
+
 ## Project Structure
 The root of the project contains directories/files:
   ```text
@@ -36,12 +42,6 @@ The root of the project contains directories/files:
   ├── requirements.txt
   └── train.py
   ```
-
-## About
-
-This repository contains an implementation of Light CNN (LCNN) for voice anti-spoofing based on the **ASVspoof 2019 Logical Access (LA)** evaluation setup.
-
-The codebase is built using the PyTorch project template, providing configuration management via [Hydra](https://hydra.cc/).
 
 ## Installation
 
